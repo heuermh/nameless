@@ -4,7 +4,7 @@
 if [ $# < 4 ]; then
     echo "Usage:"
     echo
-    echo "./release.sh <release version> <development version> <milestone id>"
+    echo "./scripts/release.sh <release version> <development version> <milestone id>"
     exit 1
 fi
 
@@ -28,6 +28,8 @@ git push origin ${branch}
 # do spark 2, scala 2.11 release
 git checkout -b maint_spark2_2.11-${release} ${branch}
 
+./scripts/move_to_scala_2.11.sh
+
 git commit -a -m "Modifying pom.xml files for Spark 2, Scala 2.11 release."
 mvn --batch-mode \
   -P distribution \
@@ -47,6 +49,8 @@ fi
 
 # do spark 2, scala 2.12 release
 git checkout -b maint_spark2_2.12-${release} ${branch}
+
+./scripts/move_to_scala_2.12.sh
 
 git commit -a -m "Modifying pom.xml files for Spark 2, Scala 2.12 release."
 mvn --batch-mode \
