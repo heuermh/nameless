@@ -1,13 +1,14 @@
 package com.github.heuermh.nameless.ds
 
-import com.google.common.base.Preconditions.checkNotNull
-
 import grizzled.slf4j.Logging
+
+import java.util.Objects.requireNonNull
 
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.function.{ Function, Function2 }
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{ DataFrame, Dataset, SQLContext }
+
 import scala.collection.JavaConversions._
 import scala.reflect.runtime.universe._
 
@@ -120,7 +121,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
    * @return this dataset transformed by the specified function over JavaRDDs
    */
   def transform(tFn: Function[JavaRDD[T], JavaRDD[T]]): V = {
-    checkNotNull(tFn)
+    requireNonNull(tFn)
     transform(rdd => tFn.call(jrdd).rdd)
   }
 
@@ -139,7 +140,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
    * @return this dataset transformed by the specified function over Datasets
    */
   def transformDataset(tFn: Function[Dataset[U], Dataset[U]]): V = {
-    checkNotNull(tFn)
+    requireNonNull(tFn)
     transformDataset(dataset => tFn.call(dataset))
   }
 
@@ -165,7 +166,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
    * @return this dataset transformed by the specified function over DataFrames
    */
   def transformDataFrame(tFn: Function[DataFrame, DataFrame]): V = {
-    checkNotNull(tFn)
+    requireNonNull(tFn)
     val sqlContext = SQLContext.getOrCreate(rdd.context)
     import sqlContext.implicits._
     transformDataFrame(tFn.call(_))(uTag)
@@ -193,8 +194,8 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   def transmute[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
     tFn: Function[JavaRDD[T], JavaRDD[X]],
     convFn: Function2[V, RDD[X], Z]): Z = {
-    checkNotNull(tFn)
-    checkNotNull(convFn)
+    requireNonNull(tFn)
+    requireNonNull(convFn)
     convFn.call(this.asInstanceOf[V], tFn.call(jrdd).rdd)
   }
 
@@ -222,8 +223,8 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   def transmuteDataset[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
     tFn: Function[Dataset[U], Dataset[Y]],
     convFn: NamelessDatasetConversion[T, U, V, X, Y, Z]): Z = {
-    checkNotNull(tFn)
-    checkNotNull(convFn)
+    requireNonNull(tFn)
+    requireNonNull(convFn)
     val tfn: Dataset[U] => Dataset[Y] = tFn.call(_)
     val cfn: (V, Dataset[Y]) => Z = convFn.call(_, _)
     transmuteDataset[X, Y, Z](tfn)(convFn.yTag, cfn)
@@ -257,8 +258,8 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   def transmuteDataFrame[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
     tFn: Function[DataFrame, DataFrame],
     convFn: NamelessDatasetConversion[T, U, V, X, Y, Z]): Z = {
-    checkNotNull(tFn)
-    checkNotNull(convFn)
+    requireNonNull(tFn)
+    requireNonNull(convFn)
     val sqlContext = SQLContext.getOrCreate(rdd.context)
     import sqlContext.implicits._
     transmuteDataFrame[X, Y, Z](tFn.call(_))(convFn.yTag,
@@ -282,7 +283,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
    * @return the union of this dataset and the specified list of datasets
    */
   def union(datasets: java.util.List[V]): V = {
-    checkNotNull(datasets)
+    requireNonNull(datasets)
     val datasetSeq: Seq[V] = datasets.toSeq
     union(datasetSeq: _*)
   }
