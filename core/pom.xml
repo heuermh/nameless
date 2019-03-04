@@ -2,16 +2,32 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>com.github.heuermh.nameless</groupId>
-    <artifactId>nameless-spark2_2.11</artifactId>
+    <artifactId>nameless-spark2_2.12</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <relativePath />
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>nameless-core-spark2_2.11</artifactId>
+  <artifactId>nameless-core-spark2_2.12</artifactId>
   <packaging>jar</packaging>
   <name>nameless_${scala.version.prefix} core</name>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -30,6 +46,10 @@
       <groupId>org.clapper</groupId>
       <artifactId>grizzled-slf4j_${scala.version.prefix}</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.version.prefix}</artifactId>
     </dependency>
   </dependencies>
 </project>

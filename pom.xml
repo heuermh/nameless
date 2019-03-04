@@ -9,7 +9,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.heuermh.nameless</groupId>
-  <artifactId>nameless-spark2_2.11</artifactId>
+  <artifactId>nameless-spark2_2.12</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>nameless_${scala.version.prefix}</name>
@@ -23,8 +23,8 @@
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.targetEncoding>UTF-8</project.build.targetEncoding>
-    <scala.version>2.11.12</scala.version>
-    <scala.version.prefix>2.11</scala.version.prefix>
+    <scala.version>2.12.6</scala.version>
+    <scala.version.prefix>2.12</scala.version.prefix>
     <slf4j.version>1.7.25</slf4j.version>
     <spark.version>2.4.0</spark.version>
   </properties>

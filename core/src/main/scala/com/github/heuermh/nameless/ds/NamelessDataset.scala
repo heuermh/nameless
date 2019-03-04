@@ -12,25 +12,6 @@ import org.apache.spark.sql.{ DataFrame, Dataset, SQLContext }
 import scala.collection.JavaConversions._
 import scala.reflect.runtime.universe._
 
-trait WithMetadata {
-  protected def saveMetadata(pathName: String): Unit
-}
-
-trait ReferenceSet {
-}
-
-trait WithReferences[T, U <: Product, V <: NamelessDataset[T, U, V]] extends WithMetadata {
-  val references: ReferenceSet
-
-  override protected def saveMetadata(pathName: String): Unit = {
-    saveReferences(pathName)
-  }
-
-  def replaceReferences(references: ReferenceSet): V
-
-  protected def saveReferences(pathName: String): Unit
-}
-
 /**
  * Nameless dataset conversion function.
  *
