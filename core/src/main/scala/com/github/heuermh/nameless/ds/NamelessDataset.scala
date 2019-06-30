@@ -88,7 +88,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   }
 
   /**
-   * (Scala-specific) Transform this dataset by the specified function over RDDs.
+   * Transform this dataset by the specified function over RDDs.
    *
    * @param tFn transform function over RDDs
    * @return this dataset transformed by the specified function over RDDs
@@ -96,18 +96,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   def transform(tFn: RDD[T] => RDD[T]): V
 
   /**
-   * (Java-specific) Transform this dataset by the specified function over JavaRDDs.
-   *
-   * @param tFn transform function over JavaRDDs, must not be null
-   * @return this dataset transformed by the specified function over JavaRDDs
-   */
-  def transform(tFn: Function[JavaRDD[T], JavaRDD[T]]): V = {
-    requireNonNull(tFn)
-    transform(rdd => tFn.call(jrdd).rdd)
-  }
-
-  /**
-   * (Scala-specific) Transform this dataset by the specified function over Datasets.
+   * Transform this dataset by the specified function over Datasets.
    *
    * @param tFn transform function over Datasets
    * @return this dataset transformed by the specified function over Datasets
@@ -115,18 +104,7 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   def transformDataset(tFn: Dataset[U] => Dataset[U]): V
 
   /**
-   * (Java-specific) Transform this dataset by the specified function over Datasets.
-   *
-   * @param tFn transform function over Datasets, must not be null
-   * @return this dataset transformed by the specified function over Datasets
-   */
-  def transformDataset(tFn: Function[Dataset[U], Dataset[U]]): V = {
-    requireNonNull(tFn)
-    transformDataset(dataset => tFn.call(dataset))
-  }
-
-  /**
-   * (Scala-specific) Transform this dataset by the specified function over DataFrames.
+   * Transform this dataset by the specified function over DataFrames.
    *
    * @param tFn transform function over DataFrames
    * @return this dataset transformed by the specified function over DataFrames
@@ -138,19 +116,6 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
     transformDataset((ds: Dataset[U]) => {
       tFn(ds.toDF()).as[U]
     })
-  }
-
-  /**
-   * (Java-specific) Transform this dataset by the specified function over DataFrames.
-   *
-   * @param tFn transform function over DataFrames, must not be null
-   * @return this dataset transformed by the specified function over DataFrames
-   */
-  def transformDataFrame(tFn: Function[DataFrame, DataFrame]): V = {
-    requireNonNull(tFn)
-    val sqlContext = SQLContext.getOrCreate(rdd.context)
-    import sqlContext.implicits._
-    transformDataFrame(tFn.call(_))(uTag)
   }
 
   /**
