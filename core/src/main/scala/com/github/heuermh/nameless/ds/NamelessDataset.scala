@@ -56,8 +56,8 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
    *
    * @return this dataset converted to a DataFrame
    */
-  def toDF(): DataFrame = {
-    dataset.toDF()
+  def toDataFrame(): DataFrame = {
+    toDF()
   }
 
   /**
@@ -67,6 +67,15 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
    */
   def toDataset(): Dataset[U] = {
     dataset
+  }
+
+  /**
+   * Convert this dataset to a DataFrame.
+   *
+   * @return this dataset converted to a DataFrame
+   */
+  def toDF(): DataFrame = {
+    dataset.toDF()
   }
 
   /**
@@ -88,22 +97,6 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   }
 
   /**
-   * Transform this dataset by the specified function over RDDs.
-   *
-   * @param tFn transform function over RDDs
-   * @return this dataset transformed by the specified function over RDDs
-   */
-  def transform(tFn: RDD[T] => RDD[T]): V
-
-  /**
-   * Transform this dataset by the specified function over Datasets.
-   *
-   * @param tFn transform function over Datasets
-   * @return this dataset transformed by the specified function over Datasets
-   */
-  def transformDataset(tFn: Dataset[U] => Dataset[U]): V
-
-  /**
    * Transform this dataset by the specified function over DataFrames.
    *
    * @param tFn transform function over DataFrames
@@ -119,62 +112,20 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
   }
 
   /**
-   * (Scala-specific) Transmute this dataset by the specified function over RDDs.
-   * The conversion function is implicit.
+   * Transform this dataset by the specified function over Datasets.
    *
-   * @param tFn transmute function over RDDs
-   * @return this dataset transmuted by the specific function over RDDs
+   * @param tFn transform function over Datasets
+   * @return this dataset transformed by the specified function over Datasets
    */
-  def transmute[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](tFn: RDD[T] => RDD[X])(
-    implicit convFn: (V, RDD[X]) => Z): Z = {
-    convFn(this.asInstanceOf[V], tFn(rdd))
-  }
+  def transformDataset(tFn: Dataset[U] => Dataset[U]): V
 
   /**
-   * (Java-specific) Transmute this dataset by the specified function over JavaRDDs.
+   * Transform this dataset by the specified function over RDDs.
    *
-   * @param tFn transmute function over JavaRDDs, must not be null
-   * @param convFn conversion function, must not be null
-   * @return this dataset transmuted by the specified function over JavaRDDs
+   * @param tFn transform function over RDDs
+   * @return this dataset transformed by the specified function over RDDs
    */
-  def transmute[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
-    tFn: Function[JavaRDD[T], JavaRDD[X]],
-    convFn: Function2[V, RDD[X], Z]): Z = {
-    requireNonNull(tFn)
-    requireNonNull(convFn)
-    convFn.call(this.asInstanceOf[V], tFn.call(jrdd).rdd)
-  }
-
-  /**
-   * (Scala-specific) Transmute this dataset by the specified function over Datasets.
-   * The conversion function is implicit.
-   *
-   * @param tFn transmute function over Datasets
-   * @return this dataset transmuted by the specific function over Datasets
-   */
-  def transmuteDataset[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
-    tFn: Dataset[U] => Dataset[Y])(
-      implicit yTag: TypeTag[Y],
-      convFn: (V, Dataset[Y]) => Z): Z = {
-    convFn(this.asInstanceOf[V], tFn(dataset))
-  }
-
-  /**
-   * (Java-specific) Transmute this dataset by the specified function over Datasets.
-   *
-   * @param tFn transmute function over Datasets, must not be null
-   * @param convFn conversion function, must not be null
-   * @return this dataset transmuted by the specified function over Datasets
-   */
-  def transmuteDataset[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
-    tFn: Function[Dataset[U], Dataset[Y]],
-    convFn: NamelessDatasetConversion[T, U, V, X, Y, Z]): Z = {
-    requireNonNull(tFn)
-    requireNonNull(convFn)
-    val tfn: Dataset[U] => Dataset[Y] = tFn.call(_)
-    val cfn: (V, Dataset[Y]) => Z = convFn.call(_, _)
-    transmuteDataset[X, Y, Z](tfn)(convFn.yTag, cfn)
-  }
+  def transformRdd(tFn: RDD[T] => RDD[T]): V
 
   /**
    * (Scala-specific) Transmute this dataset by the specified function over DataFrames.
@@ -212,6 +163,64 @@ trait NamelessDataset[T, U <: Product, V <: NamelessDataset[T, U, V]] extends Lo
       (v: V, dsY: Dataset[Y]) => {
         convFn.call(v, dsY)
       })
+  }
+
+  /**
+   * (Scala-specific) Transmute this dataset by the specified function over Datasets.
+   * The conversion function is implicit.
+   *
+   * @param tFn transmute function over Datasets
+   * @return this dataset transmuted by the specific function over Datasets
+   */
+  def transmuteDataset[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
+    tFn: Dataset[U] => Dataset[Y])(
+      implicit yTag: TypeTag[Y],
+      convFn: (V, Dataset[Y]) => Z): Z = {
+    convFn(this.asInstanceOf[V], tFn(dataset))
+  }
+
+  /**
+   * (Java-specific) Transmute this dataset by the specified function over Datasets.
+   *
+   * @param tFn transmute function over Datasets, must not be null
+   * @param convFn conversion function, must not be null
+   * @return this dataset transmuted by the specified function over Datasets
+   */
+  def transmuteDataset[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
+    tFn: Function[Dataset[U], Dataset[Y]],
+    convFn: NamelessDatasetConversion[T, U, V, X, Y, Z]): Z = {
+    requireNonNull(tFn)
+    requireNonNull(convFn)
+    val tfn: Dataset[U] => Dataset[Y] = tFn.call(_)
+    val cfn: (V, Dataset[Y]) => Z = convFn.call(_, _)
+    transmuteDataset[X, Y, Z](tfn)(convFn.yTag, cfn)
+  }
+
+  /**
+   * (Scala-specific) Transmute this dataset by the specified function over RDDs.
+   * The conversion function is implicit.
+   *
+   * @param tFn transmute function over RDDs
+   * @return this dataset transmuted by the specific function over RDDs
+   */
+  def transmuteRdd[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](tFn: RDD[T] => RDD[X])(
+    implicit convFn: (V, RDD[X]) => Z): Z = {
+    convFn(this.asInstanceOf[V], tFn(rdd))
+  }
+
+  /**
+   * (Java-specific) Transmute this dataset by the specified function over JavaRDDs.
+   *
+   * @param tFn transmute function over JavaRDDs, must not be null
+   * @param convFn conversion function, must not be null
+   * @return this dataset transmuted by the specified function over JavaRDDs
+   */
+  def transmuteRdd[X, Y <: Product, Z <: NamelessDataset[X, Y, Z]](
+    tFn: Function[JavaRDD[T], JavaRDD[X]],
+    convFn: Function2[V, RDD[X], Z]): Z = {
+    requireNonNull(tFn)
+    requireNonNull(convFn)
+    convFn.call(this.asInstanceOf[V], tFn.call(jrdd).rdd)
   }
 
   /**

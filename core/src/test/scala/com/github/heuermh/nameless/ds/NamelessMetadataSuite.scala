@@ -42,11 +42,11 @@ private case class FooDataset(references: ReferenceSet)
   val dataset: Dataset[FooProduct] = null
   val rdd: RDD[Foo] = null
 
-  override def transform(tFn: RDD[Foo] => RDD[Foo]): FooDataset = {
+  override def transformDataset(tFn: Dataset[FooProduct] => Dataset[FooProduct]): FooDataset = {
     this
   }
 
-  override def transformDataset(tFn: Dataset[FooProduct] => Dataset[FooProduct]): FooDataset = {
+  override def transformRdd(tFn: RDD[Foo] => RDD[Foo]): FooDataset = {
     this
   }
 
